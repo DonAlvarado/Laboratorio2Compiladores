@@ -1,0 +1,35 @@
+# Maven
+
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# Java
+
+*.class
+*.log
+
+# VS Code
+
+.vscode/
+
+# IntelliJ
+
+.idea/
+*.iml
+
+# OS
+
+.DS_Store
+Thumbs.db
+
+# Generated sources (opcional ignorar si quieres versionarlos)
+
+target/generated-sources/
+
+# ANTLR temp files
+
+*.tokens
