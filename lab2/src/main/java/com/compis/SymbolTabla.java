@@ -1,11 +1,11 @@
 package com.compis;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class SymbolTabla {
 
-    private Map<String, Symbol> table = new HashMap<>();
+    private Map<String, Symbol> table = new LinkedHashMap<>();
 
     public void add(Symbol symbol) {
         table.put(symbol.name, symbol);

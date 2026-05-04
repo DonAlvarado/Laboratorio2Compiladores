@@ -8,7 +8,6 @@ public class Semantica extends Lab2BaseVisitor<Object> {
         return table;
     }
 
-    /* declaraciones */
     @Override
     public Object visitStatement(Lab2Parser.StatementContext ctx) {
 
@@ -26,7 +25,6 @@ public class Semantica extends Lab2BaseVisitor<Object> {
         return null;
     }
 
-    /* valores */
     @Override
     public Object visitValue(Lab2Parser.ValueContext ctx) {
 
@@ -39,77 +37,64 @@ public class Semantica extends Lab2BaseVisitor<Object> {
         return ctx.STRING().getText().replace("\"", "");
     }
 
-    /* expresiones */
     @Override
-    public Object visitExpr(Lab2Parser.ExprContext ctx) {
+    public Object visitAndExpr(Lab2Parser.AndExprContext ctx) {
 
-        /* AND */
-        if (ctx.getChildCount() == 3 && ctx.getChild(1).getText().equals("and")) {
+        Object left = visit(ctx.expr(0));
+        Object right = visit(ctx.expr(1));
 
-            Object left = visit(ctx.getChild(0));
-            Object right = visit(ctx.getChild(2));
-
-            /* string prohibido */
-            if (left instanceof String || right instanceof String) {
-                throw new RuntimeException("Error semántico: Las variables de tipo string no están permitidas en expresiones booleanas.");
-            }
-
-            /* convertir int a boolean */
-            if (left instanceof Integer)
-                left = ((int) left) != 0;
-
-            if (right instanceof Integer)
-                right = ((int) right) != 0;
-
-            /* validación final */
-            if (!(left instanceof Boolean) || !(right instanceof Boolean)) {
-                throw new RuntimeException("Error semántico: tipos incompatibles");
-            }
-
-            return (Boolean) left && (Boolean) right;
+        /* NO STRINGS */
+        if (left instanceof String || right instanceof String) {
+            throw new RuntimeException("Error semántico: Las variables de tipo string no están permitidas.");
         }
 
-        /* NOT */
-        if (ctx.getChild(0).getText().equals("not")) {
-
-            Object value = visit(ctx.getChild(2));
-
-            if (value instanceof String) {
-                throw new RuntimeException("Error semántico: Las variables de tipo string no están permitidas en expresiones booleanas.");
-            }
-
-            if (value instanceof Integer)
-                value = ((int) value) != 0;
-
-            if (!(value instanceof Boolean)) {
-                throw new RuntimeException("Error semántico: NOT inválido");
-            }
-
-            return !(Boolean) value;
+        /* VALIDAR TIPOS IGUALES */
+        if (!left.getClass().equals(right.getClass())) {
+            throw new RuntimeException("Error semántico: No se pueden combinar variables de distintos tipos.");
         }
 
-        /* ID */
-        if (ctx.ID() != null) {
-
-            String id = ctx.ID().getText();
-
-            if (!table.exists(id)) {
-                throw new RuntimeException("Variable no definida: " + id);
-            }
-
-            Object value = table.get(id).value;
-
-            if (value instanceof String) {
-                throw new RuntimeException("Error semántico: Las variables de tipo string no están permitidas en expresiones booleanas.");
-            }
-
-            return value;
+        /* convertir int a boolean */
+        if (left instanceof Integer) {
+            left = ((int) left) != 0;
+            right = ((int) right) != 0;
         }
 
-        return visitChildren(ctx);
+        return (Boolean) left && (Boolean) right;
     }
 
-    /* flujo principal */
+    @Override
+    public Object visitNotExpr(Lab2Parser.NotExprContext ctx) {
+
+        Object value = visit(ctx.expr());
+
+        if (value instanceof String) {
+            throw new RuntimeException("Error semántico: string no permitido.");
+        }
+
+        if (value instanceof Integer)
+            value = ((int) value) != 0;
+
+        return !(Boolean) value;
+    }
+
+    @Override
+    public Object visitIdExpr(Lab2Parser.IdExprContext ctx) {
+
+        String id = ctx.ID().getText();
+
+        if (!table.exists(id)) {
+            throw new RuntimeException("Variable no definida: " + id);
+        }
+
+        Object value = table.get(id).value;
+
+        if (value instanceof String) {
+            throw new RuntimeException("Error semántico: string no permitido.");
+        }
+
+        return value;
+    }
+
     @Override
     public Object visitProgram(Lab2Parser.ProgramContext ctx) {
 
